@@ -32,9 +32,11 @@ db_1row todays_date "
 	from dual
 "
 
+set start_date "${filter_year}-01-01"
+set end_date "[expr ${filter_year} +1]-01-01"
+
 if {![info exists start_date] || "" == $start_date} { set start_date "$todays_year-01-01" }
 if {![info exists end_date] || "" == $end_date} { set end_date "[expr $todays_year+1]-01-01" }
-
 
 # Check that Start & End-Date have correct format
 im_date_ansi_to_julian $start_date
@@ -61,35 +63,43 @@ set error_html [im_department_planner_get_list_multirow \
 ]
 
 
+
 # ---------------------------------------------------------------
 # Build the header from multirows
 # ---------------------------------------------------------------
-
 set header_html ""
 template::multirow foreach dynview_columns {
-    append header_html "<td class=rowtitle>$column_title</td>"
+   	append header_html "<td class=rowtitle>$column_title</td>"
 }
+	
 template::multirow foreach cost_centers {
-    append header_html "<td class=rowtitle>$cost_center_name</td>"
+   	append header_html "<td class=rowtitle>$cost_center_name</td>"
 }
 set header_html "<tr class=rowtitle>$header_html</tr>\n"
 
+
 # ---------------------------------------------------------------
-# Build the first line from multirows
+# Build the first line with available days and the second 
+# with the remaining days from multirows
 # ---------------------------------------------------------------
 
 set first_line_html ""
+set second_line_html ""
 template::multirow foreach dynview_columns {
-    append first_line_html "<td class=rowtitle>&nbsp;</td>\n"
+   	append first_line_html "<td class=rowtitle>&nbsp;</td>\n"
+   	append second_line_html "<td class=rowtitle>&nbsp;</td>\n"
 }
-template::multirow foreach cost_centers {
-    append first_line_html "<td class=rowtitle>$department_planner_days_per_year</td>\n"
 
-    # Set the hash values for the columns, so that the body can subtract
-    # the project's required days from the days available at the cost center
-    set remaining_days($cost_center_id) $department_planner_days_per_year
+template::multirow foreach cost_centers {
+   	append first_line_html "<td class=rowtitle>$available_days</td>\n"
+   	append second_line_html "<td class=rowtitle>$department_remaining_days</td>\n"
+
+   	# Set the hash values for the columns, so that the body can subtract
+  	# the project's required days from the days available at the cost center
+   	set remaining_days($cost_center_id) $department_remaining_days
 }
-set first_line_html "<tr class=rowtitle>$first_line_html</tr>\n"
+	
+set first_line_html "<tr class=rowtitle>$first_line_html</tr>\n<tr class=rowtitle>$second_line_html</tr>\n"
 
 
 # ---------------------------------------------------------------
@@ -97,24 +107,24 @@ set first_line_html "<tr class=rowtitle>$first_line_html</tr>\n"
 # ---------------------------------------------------------------
 
 set body_html ""
+
 template::multirow foreach department_planner {
 
     append body_html "<tr>\n"
     template::multirow foreach dynview_columns {
-	set dynview_var "col_$column_ctr"
-	set dynview_val [expr $$dynview_var]
-	append body_html "<td>$dynview_val</td>"
+		set dynview_var "col_$column_ctr"
+		set dynview_val [expr $$dynview_var]
+		append body_html "<td>$dynview_val</td>"
     }
-    template::multirow foreach cost_centers {
-	set cc_var "cc_$cost_center_id"
-	set rem_days [expr $remaining_days($cost_center_id) - $$cc_var]
-	set remaining_days($cost_center_id) $rem_days
 
-	set bgcolor_html "bgcolor=\#80FF80"
-	if {$rem_days < 0.0} { set bgcolor_html "bgcolor=\#FF8080" }
-	append body_html "<td $bgcolor_html>[expr round(10.0 * $rem_days) / 10.0]</td>"
+    template::multirow foreach cost_centers {
+		set cc_var "cc_$cost_center_id"
+		set rem_days [expr $remaining_days($cost_center_id) - $$cc_var]
+		set remaining_days($cost_center_id) $rem_days
+
+		set bgcolor_html "bgcolor=\#80FF80"
+		if {$rem_days < 0.0} { set bgcolor_html "bgcolor=\#FF8080" }
+		append body_html "<td $bgcolor_html>$rem_days</td>"
     }
     append body_html "</tr>\n"
-
 }
-

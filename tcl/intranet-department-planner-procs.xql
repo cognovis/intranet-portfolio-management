@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE queryset PUBLIC "-//OpenACS//DTD XQL 1.0//EN" "/usr/share/emacs/DTDs/xql.dtd">
 <!-- @creation-date 2010-08-08 -->
-<!-- @cvs-id $Id$ -->
+<!-- @cvs-id $Id: intranet-department-planner-procs.xql,v 1.1 2010/08/05 18:24:03 po34demo Exp $ -->
 
 <queryset>
   <rdbms>
@@ -52,6 +52,7 @@
 		child.project_id = task.task_id and
 		main.parent_id is null and
 		child.tree_sortkey between main.tree_sortkey and tree_right(main.tree_sortkey)
+        $criteria
 	order by
 		child.tree_sortkey
     </querytext>
@@ -60,12 +61,20 @@
   <fullquery name="im_department_planner_get_list_multirow.cost_centers">
     <querytext>
 	select	cc.*,
-		(select sum(coalesce(availability,0))
+		(select coalesce(sum(availability),0)
 		from	cc_users u
 			LEFT OUTER JOIN im_employees e ON (u.user_id = e.employee_id)
 		where	e.department_id = cc.cost_center_id and
 			u.member_state = 'approved'
 		) as employee_available_percent,
+		(select coalesce(sum(hours),0)
+		from	im_hours i,cc_users u
+			LEFT OUTER JOIN im_employees e ON (u.user_id = e.employee_id)
+		where	e.department_id = cc.cost_center_id and
+			u.member_state = 'approved'
+			and i.user_id = u.user_id
+                        and i.day between to_date(:report_start_date,'YYYY-MM-DD') and to_date(:report_end_date,'YYYY-MM-DD')
+		) as employee_logged_hours,
 		(
 		select	count(*)
 		from	im_projects main,
@@ -77,6 +86,7 @@
 			cc.cost_center_id = task.cost_center_id
 		) as task_count
 	from	im_cost_centers cc
+	where   cc.cost_center_status_id = 3101
 	order by
 		lower(cost_center_code)
     </querytext>
@@ -85,42 +95,24 @@
   <fullquery name="im_department_planner_get_list_multirow.left_dimension_projects">
     <querytext>
 	select	main.*,
+                coalesce(project_priority,0) as prio_sort,
 		main.project_id as main_project_id,
-		prio.aux_int1 as priority
+	        im_category_from_id(project_status_id) as project_status,
+		(select aux_int1 from im_categories where category_id = project_priority_op_id) as project_priority_op,
+		(select aux_int1 from im_categories where category_id = project_priority_st_id) as project_priority_st	
 	from	im_projects main
-		LEFT OUTER JOIN im_categories prio ON main.project_priority_id = prio.category_id
 	where	parent_id is null and
 		main.project_type_id not in ([im_project_type_task], [im_project_type_ticket]) and
-		main.project_status_id in ([join [im_sub_categories [im_project_status_open]] ","])
+                (main.start_date between to_date(:report_start_date,'YYYY-MM-DD') and to_date(:report_end_date,'YYYY-MM-DD') or
+                 main.end_date between to_date(:report_start_date,'YYYY-MM-DD') and to_date(:report_end_date,'YYYY-MM-DD')) and
+                project_status_id in ([template::util::tcl_to_sql_list [im_sub_categories [list 76 71]]])
+                $criteria
 	order by
-		prio.aux_int1,
+		prio_sort desc,
 		lower(main.project_name)
     </querytext>
   </fullquery>
   
-  <fullquery name="im_department_planner_get_list_multirow.ttt">
-    <querytext>
 
-    </querytext>
-  </fullquery>
-  
-  <fullquery name="im_department_planner_get_list_multirow.ttt">
-    <querytext>
-
-    </querytext>
-  </fullquery>
-  
-  <fullquery name="im_department_planner_get_list_multirow.ttt">
-    <querytext>
-
-    </querytext>
-  </fullquery>
-  
-  <fullquery name="im_department_planner_get_list_multirow.ttt">
-    <querytext>
-
-    </querytext>
-  </fullquery>
-  
 
 </queryset>

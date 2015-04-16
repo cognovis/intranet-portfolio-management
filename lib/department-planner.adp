@@ -1,7 +1,6 @@
-
 <table>
-<form action=save>
-<%= [export_vars return_url] %>
+<form action=save method=post>
+<%= [export_vars -form {return_url filter_year include_remaining_p}] %>
 @header_html;noquote@
 @first_line_html;noquote@
 @body_html;noquote@

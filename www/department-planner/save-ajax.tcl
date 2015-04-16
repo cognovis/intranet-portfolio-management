@@ -1,4 +1,4 @@
-# /packages/intranet-pmo/www/department-planner/save.tcl
+# /packages/intranet-pmo/www/department-planner/save-ajax.tcl
 #
 # Copyright (c) 2011, cognovís GmbH, Hamburg, Germany
 # This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-#
 
 ad_page_contract {
     Save the priorities of the projects
@@ -52,34 +51,38 @@ foreach project_id $project_ids {
     im_project_permissions $user_id $project_id view read write admin
     if {!$write} { ad_return_complaint 1 $action_forbidden_msg }
 
+    ds_comment "$project_id :: $project_priority_op_id($project_id)"
     if {[exists_and_not_null project_priority_op_id($project_id)]} {
 	set priority_op $project_priority_op_id($project_id)
-	set priority [db_string priority "select aux_int1 from im_categories where category_id = :priority_op" -default 0]
+	if {$priority_op eq "Not set"} {
+	    set priority_op 0
+	}
+	set op_cat_id [db_string prio "select category_id from im_categories where aux_int1 = :priority_op and category_type = 'Intranet Department Planner Project Priority'"]
     } else {
-	set priority_op ""
-	set priority 0
+	set priority $priority_op 
     }
 
     if {[exists_and_not_null project_priority_st_id($project_id)]} {
 	set priority_st $project_priority_st_id($project_id)
-	incr priority  [db_string priority "select aux_int1 from im_categories where category_id = :priority_st" -default 0]
+	if {$priority_st eq "Not set"} {
+	    set priority_st 0
+	}
+	set st_cat_id [db_string prio "select category_id from im_categories where aux_int1 = :priority_st and category_type = 'Intranet Department Planner Project Priority'"]
     } else {
 	set priority_st ""
     }
 
-    if {$priority eq 0} {
-	set priority ""
-    }
+    set priority [expr $priority_op + $priority_st]
 
-    ds_comment "updated $project_id :: $priority_op :: $priority_st :: $priority"
+#    ds_comment "updated $project_id :: $priority_op :: $op_cat_id :: $priority_st :: $st_cat_id :: $priority"
     db_dml update_project "
 			update im_projects set
-				project_priority_op_id = :priority_op,
-				project_priority_st_id = :priority_st,
+				project_priority_op_id = :op_cat_id,
+				project_priority_st_id = :st_cat_id,
 				project_priority = :priority
 			where project_id = :project_id
     "
 
 }
-
+ds_comment "$return_url"
 ad_returnredirect $return_url

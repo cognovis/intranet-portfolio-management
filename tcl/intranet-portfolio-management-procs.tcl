@@ -109,6 +109,7 @@ ad_proc -public im_program_portfolio_list_component {
 
     set column_sql "
 	select	column_name,
+	    column_id,
 		column_render_tcl,
 		visible_for,
 	        extra_where,
@@ -119,44 +120,56 @@ ad_proc -public im_program_portfolio_list_component {
 		and group_id is null
 	order by sort_order
     "
+
+    set table_header_html "<tr>\n"
     db_foreach column_list_sql $column_sql {
-	if {"" == $visible_for || [eval $visible_for]} {
-	    lappend column_headers "$column_name"
-	    lappend column_vars "$column_render_tcl"
-	}
-	if {"" != $extra_select} { lappend extra_selects $extra_select }
-	if {"" != $extra_from} { lappend extra_froms $extra_from }
-	if {"" != $extra_where} { lappend extra_wheres $extra_where }
+        	if {"" == $visible_for || [eval $visible_for]} {
+        	    lappend column_headers "$column_name"
+        	    lappend column_vars "$column_render_tcl"
+            set admin_html ""
+            if {$admin_p} {
+               set url [export_vars -base "/intranet/admin/views/new-column" {column_id view_id return_url}]
+               set admin_html "<a href='$url'>$wrench_gif</a>"
+    	        }
+    	    
+    	        regsub -all " " $column_name "_" col_txt
+    	        set col_txt [lang::message::lookup "" intranet-core.$col_txt $column_name]
+    	        append table_header_html "  <td class=rowtitle>$col_txt $admin_html</td>\n"
+        	}
+        	if {"" != $extra_select} { lappend extra_selects $extra_select }
+        	if {"" != $extra_from} { lappend extra_froms $extra_from }
+        	if {"" != $extra_where} { lappend extra_wheres $extra_where }
     }
 
+    append table_header_html "</tr>\n"
     # ---------------------------------------------------------------
     # Generate SQL Query
 
     set extra_select [join $extra_selects ",\n\t"]
     if { ![empty_string_p $extra_select] } {
-	set extra_select ",\n\t$extra_select"
+        	set extra_select ",\n\t$extra_select"
     }
 
     set extra_from [join $extra_froms ",\n\t"]
     if { ![empty_string_p $extra_from] } {
-	set extra_from ",\n\t$extra_from"
+        	set extra_from ",\n\t$extra_from"
     }
 
     set extra_where [join $extra_wheres "and\n\t"]
     if { ![empty_string_p $extra_where] } {
-	set extra_where "and\n\t$extra_where"
+        	set extra_where "and\n\t$extra_where"
     }
 
     # Project Status restriction
     set project_status_restriction ""
     if {0 != $project_status_id} {
-	set project_status_restriction "and p.project_status_id in ([join [im_sub_categories $project_status_id] ","])"
+        	set project_status_restriction "and p.project_status_id in ([join [im_sub_categories $project_status_id] ","])"
     }
 
     # Project Type restriction
     set project_type_restriction ""
     if {0 != $project_type_id} {
-	set project_type_restriction "and p.project_type_id in ([join [im_sub_categories $project_type_id] ","])"
+        	set project_type_restriction "and p.project_type_id in ([join [im_sub_categories $project_type_id] ","])"
     }
 
     set perm_sql "
@@ -178,16 +191,16 @@ ad_proc -public im_program_portfolio_list_component {
     "
 
     if {$current_user_id == $admin_user_id || [im_permission $current_user_id "view_projects_all"]} {
-	set perm_sql "
-	(select	p.*
-	from	im_projects p
-	where	p.parent_id is null and
-		p.program_id = :program_id and
-		p.project_type_id not in ([im_project_type_task], [im_project_type_ticket]) and
-                p.project_status_id not in ([im_project_status_deleted], [im_project_status_closed])
-                $project_status_restriction
-                $project_type_restriction
-	)"
+        	set perm_sql "
+        	(select	p.*
+        	from	im_projects p
+        	where	p.parent_id is null and
+        		p.program_id = :program_id and
+        		p.project_type_id not in ([im_project_type_task], [im_project_type_ticket]) and
+                        p.project_status_id not in ([im_project_status_deleted], [im_project_status_closed])
+                        $project_status_restriction
+                        $project_type_restriction
+        	)"
     }
 
     set program_query "
@@ -228,21 +241,6 @@ ad_proc -public im_program_portfolio_list_component {
 
     # Set up colspan to be the number of headers + 1 for the # column
     set colspan [expr [llength $column_headers] + 1]
-
-    set table_header_html "<tr>\n"
-    foreach col $column_headers {
-
-	set admin_html ""
-	if {$admin_p} {
-	    set url [export_vars -base "/intranet/admin/views/new-column" {column_id return_url}]
-	    set admin_html "<a href='$url'>$wrench_gif</a>"
-	}
-
-	regsub -all " " $col "_" col_txt
-	set col_txt [lang::message::lookup "" intranet-core.$col_txt $col]
-	append table_header_html "  <td class=rowtitle>$col_txt $admin_html</td>\n"
-    }
-    append table_header_html "</tr>\n"
 
 
     # ---------------------------------------------------------------
