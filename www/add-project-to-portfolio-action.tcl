@@ -26,7 +26,7 @@ if {!$write} {
 foreach pid $project_id {
     im_project_permissions $current_user_id $pid view read write admin
     if {!$write} {
-	ad_return_complaint 1 "You don't have the necessary permissions to modify project #$project_id".
+	ad_return_complaint 1 "You don't have the necessary permissions to modify project #$project_id."
 	ad_script_abort
     }
 }
