@@ -17,7 +17,7 @@
 
 
 set project_base_url "/intranet/projects/view"
-set this_base_url "/intranet-budget/department-planner/index"
+set this_base_url "/intranet-portfolio-management/department-planner/index"
 set bgcolor(0) " class=roweven "
 set bgcolor(1) " class=rowodd "
 
@@ -94,23 +94,23 @@ set column_names [list]
 set editors_conf ""	
 set editors_init ""	
 
-template::head::add_javascript -src "/resources/intranet-budget/js/yahoo-dom-event.js" -order "100"
-template::head::add_javascript -src "/resources/intranet-budget/js/container-min.js" -order "101"
-template::head::add_javascript -src "/resources/intranet-budget/js/connection-min.js" -order "102"
-template::head::add_javascript -src "/resources/intranet-budget/js/element-min.js" -order "103"
-template::head::add_javascript -src "/resources/intranet-budget/js/paginator-min.js" -order "104"
-template::head::add_javascript -src "/resources/intranet-budget/js/datasource-min.js" -order "105"
-template::head::add_javascript -src "/resources/intranet-budget/js/datatable-min.js" -order "106"
-template::head::add_javascript -src "/resources/intranet-budget/js/json-min.js" -order "107"
-template::head::add_javascript -src "/resources/intranet-budget/js/button-min.js" -order "108"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/yahoo-dom-event.js" -order "100"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/container-min.js" -order "101"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/connection-min.js" -order "102"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/element-min.js" -order "103"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/paginator-min.js" -order "104"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/datasource-min.js" -order "105"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/datatable-min.js" -order "106"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/json-min.js" -order "107"
+template::head::add_javascript -src "/resources/intranet-portfolio-management/js/button-min.js" -order "108"
 
-template::head::add_css -href "/resources/intranet-budget/css/container.css" -media "screen" -order "103"
-template::head::add_css -href "/resources/intranet-budget/css/paginator.css" -media "screen" -order "104"
-template::head::add_css -href "/resources/intranet-budget/css/datatable.css" -media "screen" -order "105"
+template::head::add_css -href "/resources/intranet-portfolio-management/css/container.css" -media "screen" -order "103"
+template::head::add_css -href "/resources/intranet-portfolio-management/css/paginator.css" -media "screen" -order "104"
+template::head::add_css -href "/resources/intranet-portfolio-management/css/datatable.css" -media "screen" -order "105"
 
 # template::head::add_css -href "http://yui.yahooapis.com/2.8.0/build/reset-fonts-grids/reset-fonts-grids.css" -media "screen" -order "106"
 # template::head::add_css -href "http://yui.yahooapis.com/2.8.0/build/base/base.css" -media "screen" -order "107"
-template::head::add_css -href "/resources/intranet-budget/css/skin.css" -media "screen" -order "108"
+template::head::add_css -href "/resources/intranet-portfolio-management/css/skin.css" -media "screen" -order "108"
 
 # set response_schema & column_defs
 db_foreach query_name $sql {

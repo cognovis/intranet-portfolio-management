@@ -26,11 +26,11 @@ YAHOO.util.Event.addListener(window, "load", function() {
 		function calculateTable(p_oEvent) {
 			setPrioAverage();			
 			myDataTable.sortColumn(myDataTable.getColumn("project_priority"),"yui-dt-desc");
-            myDataTable.reCalculate();	
+			myDataTable.reCalculate();	
 		}
 
 		function getValueCellEditor(label) {
-            field = 'project_priority_op_id';
+            field = 'project_priority_id';
             var oColumn = myDataTable.getColumn(field),
             lookupTable = oColumn.lookupTable  || (oColumn.editor instanceof YAHOO.widget.DropdownCellEditor) && oColumn.editor.dropdownOptions;
             if (YAHOO.lang.isArray(lookupTable)) {
@@ -46,8 +46,6 @@ YAHOO.util.Event.addListener(window, "load", function() {
         
         @editors_init;noquote@
         
-		// ddEditor_project_priority_op_id.subscribe('saveEvent', editorSaveHandler);
-		// ddEditor_project_priority_st_id.subscribe('saveEvent', editorSaveHandler);
         
 		YAHOO.widget.DataTable.formatLookup = function(elCell, oRecord,	oColumn, oData) {
 			var lookupTable = oColumn.lookupTable  || (oColumn.editor instanceof YAHOO.widget.DropdownCellEditor) && oColumn.editor.dropdownOptions;
@@ -66,8 +64,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
             var records = myDataTable.getRecordSet().getRecords();
             var record_ctr = 0;
             for (j=0; j < records.length; j++) {
-                project_priority_value = parseInt(getValueCellEditor(myDataTable.getRecordSet().getRecord(record_ctr).getData('project_priority_op_id')));
-			    project_priority_value += parseInt(getValueCellEditor(myDataTable.getRecordSet().getRecord(record_ctr).getData('project_priority_st_id')));
+                project_priority_value = parseInt(getValueCellEditor(myDataTable.getRecordSet().getRecord(record_ctr).getData('project_priority_id')));
 			    myDataTable.getRecordSet().getRecord(record_ctr).setData("project_priority", project_priority_value)
 				record_ctr++;
             }
@@ -83,10 +80,8 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			
             for (j=0; j < records.length; j++) {
          	    project_id = myDataTable.getRecordSet().getRecord(record_ctr).getData('project_id');
-                project_priority_op_id = getValueCellEditor(myDataTable.getRecordSet().getRecord(record_ctr).getData('project_priority_op_id'));
-                project_priority_st_id = getValueCellEditor(myDataTable.getRecordSet().getRecord(record_ctr).getData('project_priority_st_id'));
-			    document.department_planner.innerHTML = document.department_planner.innerHTML + "<input type='hidden' name='project_priority_op_id." + project_id + "' value='" + project_priority_op_id + "'>";
-			    document.department_planner.innerHTML = document.department_planner.innerHTML + "<input type='hidden' name='project_priority_st_id." + project_id + "' value='" + project_priority_st_id + "'>"; 
+                project_priority_id = getValueCellEditor(myDataTable.getRecordSet().getRecord(record_ctr).getData('project_priority_id'));
+			    document.department_planner.innerHTML = document.department_planner.innerHTML + "<input type='hidden' name='project_priority_id." + project_id + "' value='" + project_priority_id + "'>";
                 record_ctr++;
                 
             }
@@ -210,7 +205,7 @@ document.getElementsByTagName('body')[0].className+='yui-skin-sam';
 
 <br />
 <br />
-<form action="/intranet-budget/department-planner/save-ajax.tcl" name="department_planner" id="department_planner" method="post">
+<form action="/intranet-portfolio-management/department-planner/save-ajax.tcl" name="department_planner" id="department_planner" method="post">
         <button type="button" id="pushbutton1" name="button1" value="Add">Calculate</button> 
         <button type="button" id="pushbutton2" name="button2" value="Add">Save</button> 
 </form>
