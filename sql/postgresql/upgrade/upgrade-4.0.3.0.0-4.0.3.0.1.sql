@@ -53,7 +53,7 @@ BEGIN
 			      im_view_columns 
 			set 
 			      column_name = 'Program Name',
-			      column_render_tcl = '"<A HREF=/intranet/projects/index?&filter_advanced_p=1&program_id=$project_id>[string range $project_name 0 30]</A>"'
+			      column_render_tcl = '"<A HREF=/intranet/projects/view?project_id=$project_id>[string range $project_name 0 30]</A>"'
                 	where 
 			      column_id = 30010;  
 	       EXCEPTION
